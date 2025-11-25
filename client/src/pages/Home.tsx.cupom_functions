@@ -1,0 +1,98 @@
+
+  // Admin: Adicionar cupom
+  const handleAddCoupon = () => {
+    if (!couponCodeForm || !couponValue) {
+      alert("Preencha código e valor do cupom!");
+      return;
+    }
+    const newCoupon: Coupon = {
+      id: Date.now().toString(),
+      code: couponCodeForm.toUpperCase(),
+      type: couponType,
+      value: parseFloat(couponValue),
+      active: true,
+      description: couponDescription,
+    };
+    setCoupons([...coupons, newCoupon]);
+    clearCouponForm();
+    alert("Cupom adicionado com sucesso!");
+  };
+
+  const handleEditCoupon = (coupon: Coupon) => {
+    setEditingCouponId(coupon.id);
+    setCouponCodeForm(coupon.code);
+    setCouponType(coupon.type);
+    setCouponValue(coupon.value.toString());
+    setCouponDescription(coupon.description);
+  };
+
+  const handleSaveCouponEdit = () => {
+    if (!editingCouponId) return;
+    setCoupons(
+      coupons.map((c) =>
+        c.id === editingCouponId
+          ? {
+              ...c,
+              code: couponCodeForm.toUpperCase(),
+              type: couponType,
+              value: parseFloat(couponValue),
+              description: couponDescription,
+            }
+          : c
+      )
+    );
+    clearCouponForm();
+    alert("Cupom atualizado com sucesso!");
+  };
+
+  const handleDeleteCoupon = (id: string) => {
+    if (confirm("Tem certeza que deseja remover este cupom?")) {
+      setCoupons(coupons.filter((c) => c.id !== id));
+    }
+  };
+
+  const handleToggleCoupon = (id: string) => {
+    setCoupons(
+      coupons.map((c) =>
+        c.id === id ? { ...c, active: !c.active } : c
+      )
+    );
+  };
+
+  const clearCouponForm = () => {
+    setCouponCodeForm("");
+    setCouponType("percentage");
+    setCouponValue("");
+    setCouponDescription("");
+    setEditingCouponId(null);
+  };
+
+  const applyCoupon = () => {
+    if (!couponCode.trim()) {
+      alert("Digite um código de cupom!");
+      return;
+    }
+    const coupon = coupons.find(
+      (c) => c.code === couponCode.toUpperCase() && c.active
+    );
+    if (!coupon) {
+      alert("Cupom inválido ou expirado!");
+      return;
+    }
+    setAppliedCoupon(coupon);
+    alert(`Cupom "${coupon.code}" aplicado com sucesso!`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
+
+  const calculateDiscount = (subtotal: number): number => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === "percentage") {
+      return (subtotal * appliedCoupon.value) / 100;
+    } else {
+      return Math.min(appliedCoupon.value, subtotal);
+    }
+  };
